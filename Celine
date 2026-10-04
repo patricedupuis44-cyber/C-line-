@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit & Satisfaction Quality</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 16px; display: flex; justify-content: center; }
+        .app-card { background: var(--card); border-radius: 16px; padding: 24px; max-width: 480px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+        h2 { font-size: 1.25rem; margin-top: 0; color: var(--primary); }
+        .progress { background: #e2e8f0; height: 6px; border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
+        .progress-bar { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease; }
+        .options { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        button.option-btn { padding: 14px 16px; border: 2px solid #e2e8f0; background: none; border-radius: 10px; font-size: 1rem; text-align: left; cursor: pointer; transition: all 0.2s; color: var(--text); }
+        button.option-btn:active { background: #eff6ff; border-color: var(--primary); }
+        .chart-container { position: relative; width: 100%; aspect-ratio: 1/1; margin-top: 20px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <div id="quiz-screen">
+        <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+        <span id="question-number" style="font-size: 0.85rem; color: #64748b; font-weight: bold;">Question 1/5</span>
+        <h2 id="question-text" style="margin-top: 8px;">Intitulé de la question</h2>
+        
+        <div class="options" id="options-container">
+            <!-- Les 4 propositions s'affichent ici -->
+        </div>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <h2>Résultats de l'évaluation</h2>
+        <p style="font-size: 0.9rem; color: #64748b;">Voici la synthèse sous forme de graphique radar :</p>
+        <div class="chart-container">
+            <canvas id="radarChart"></canvas>
+        </div>
+        <button onclick="location.reload()" style="margin-top:20px; width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold;">Nouvelle évaluation</button>
+    </div>
+</div>
+
+<script>
+    // 1. CONFIGURATION DES QUESTIONS ET BARÈME DES 4 CHOIX (de 1 à 4)
+    const questions = [
+        {
+            title: "Accueil & Prise en charge",
+            options: [
+                { label: "Insatisfaisant", score: 1 },
+                { label: "Moyen", score: 2 },
+                { label: "Bon", score: 3 },
+                { label: "Excellent", score: 4 }
+            ]
+        },
+        {
+            title: "Délai d'attente / Réactivité",
+            options: [
+                { label: "Très long", score: 1 },
+                { label: "Acceptable", score: 2 },
+                { label: "Rapide", score: 3 },
+                { label: "Immédiat", score: 4 }
+            ]
+        },
+        {
+            title: "Qualité de la prestation",
+            options: [
+                { label: "Non conforme", score: 1 },
+                { label: "Partiellement conforme", score: 2 },
+                { label: "Conforme", score: 3 },
+                { label: "Supérieure aux attentes", score: 4 }
+            ]
+        },
+        {
+            title: "Propreté & Environnement",
+            options: [
+                { label: "Médiocre", score: 1 },
+                { label: "Passable", score: 2 },
+                { label: "Propre", score: 3 },
+                { label: "Impeccable", score: 4 }
+            ]
+        },
+        {
+            title: "Recommandation globale",
+            options: [
+                { label: "Jamais", score: 1 },
+                { label: "Peu probable", score: 2 },
+                { label: "Probable", score: 3 },
+                { label: "Tout à fait", score: 4 }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    const scores = [];
+
+    function loadQuestion() {
+        const q = questions[currentQuestionIndex];
+        document.getElementById('question-number').innerText = `Question ${currentQuestionIndex + 1}/${questions.length}`;
+        document.getElementById('question-text').innerText = q.title;
+        document.getElementById('progress-bar').style.width = `${((currentQuestionIndex) / questions.length) * 100}%`;
+
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt.label;
+            btn.onclick = () => selectOption(opt.score);
+            container.appendChild(btn);
+        });
+    }
+
+    function selectOption(score) {
+        scores.push(score);
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+
+        const labels = questions.map(q => q.title);
+        const ctx = document.getElementById('radarChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Score (sur 4)',
+                    data: scores,
+                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                    borderColor: '#2563eb',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#2563eb'
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 4,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    // Démarrage
+    loadQuestion();
+</script>
+</body>
+</html>
