@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BreizhMental</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f8;
+            color: #333;
+        }
+
+        /* BARRE DE NAVIGATION FIXE EN HAUT */
+        header {
+            background-color: #005f73;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* LES 2 RUBRIQUES DU MENU */
+        nav button {
+            background: none;
+            border: 2px solid white;
+            color: white;
+            padding: 8px 16px;
+            margin-left: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        nav button:hover, nav button.active {
+            background-color: white;
+            color: #005f73;
+            font-weight: bold;
+        }
+
+        /* ZONES DE CONTENU */
+        main {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* MASQUER PAR DÉFAUT */
+        .section {
+            display: none;
+        }
+
+        /* SEULE LA RUBRIQUE SÉLECTIONNÉE S'AFFICHE */
+        .section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MENU PRINCIPAL À 2 RUBRIQUES -->
+    <header>
+        <div class="logo">BreizhMental</div>
+        <nav>
+            <button id="btn-accueil" class="active" onclick="afficherRubrique('accueil')">Accueil</button>
+            <button id="btn-avis" onclick="afficherRubrique('avis')">Avis</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- 1ÈRE RUBRIQUE : ACCUEIL -->
+        <div id="accueil" class="section active">
+            <h1>Bienvenue sur BreizhMental</h1>
+            <p>Votre espace dédié à la préparation mentale et au bien-être en Bretagne.</p>
+            <p>Utilisez le menu en haut pour naviguer entre la rubrique Accueil et la rubrique Avis.</p>
+        </div>
+
+        <!-- 2ÈME RUBRIQUE : AVIS (TEXTE UNIQUEMENT, AUCUN FORMULAIRE) -->
+        <div id="avis" class="section">
+            <h1>Avis des clients</h1>
+            <p>Retrouvez ici les retours et témoignages de nos accompagnés :</p>
+            <ul>
+                <li><strong>Julien M. :</strong> "Un accompagnement au top qui m'a aidé à mieux gérer le stress."</li>
+                <li><strong>Cécile R. :</strong> "Excellente approche, très professionnelle et à l'écoute."</li>
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        function afficherRubrique(nomRubrique) {
+            // Masquer les deux rubriques
+            document.getElementById('accueil').classList.remove('active');
+            document.getElementById('avis').classList.remove('active');
+
+            // Réinitialiser les boutons du menu
+            document.getElementById('btn-accueil').classList.remove('active');
+            document.getElementById('btn-avis').classList.remove('active');
+
+            // Activer la rubrique choisie
+            document.getElementById(nomRubrique).classList.add('active');
+            document.getElementById('btn-' + nomRubrique).classList.add('active');
+        }
+    </script>
+
+</body>
+</html>
